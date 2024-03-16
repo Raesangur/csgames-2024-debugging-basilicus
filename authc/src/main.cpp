@@ -5,7 +5,7 @@
 
 #define CMD_LOGIN 1
 #define CMD_ADMIN 2
-#define CMD_2FA   3
+#define CMD_2FA   4
 #define CMD_ERROR -1
 
 size_t readCommand()
@@ -20,17 +20,17 @@ size_t readCommand()
     }
 
     if(strcmp(command, "2fa") == 0)
-        return readCommand() & CMD_2FA;
+        return readCommand() | CMD_2FA;
 
     if(strcmp(command, "admin") == 0)
-        return readCommand() & CMD_ADMIN;
+        return readCommand() | CMD_ADMIN;
 
 
     return CMD_ERROR;
 }
 
-#define EQ(a, b)            a == b
-#define HAS_FLAG(cmd, flag) EQ(cmd& flag, flag)
+#define EQ(a, b)            (a) == (b)
+#define HAS_FLAG(cmd, flag) EQ((cmd & flag), flag)
 
 typedef struct
 {
@@ -77,14 +77,12 @@ size_t handleCommand(size_t cmd)
 
     if(strstr("admin", user->name) != 0)
     {
-        if(!HAS_FLAG(cmd, CMD_ADMIN))
+        if(!(HAS_FLAG(cmd, CMD_ADMIN)))
         {
             printf("ERR: admin access requires admin privileges\n");
             return 1;
         }
     }
-
-    printf("%d\n", (int)cmd);
 
     if(HAS_FLAG(cmd, CMD_2FA))
     {
